@@ -5,13 +5,6 @@ import benchmarks.BaseFunctions;
 import interfaces.Experiment;
 import interfaces.Algorithm;
 import interfaces.Problem;
-//import algorithms.*; 
-import algorithms.ISPO; 
-import algorithms.CMAES;
-import benchmarks.BaseFunctions.Alpine; 
-import benchmarks.BaseFunctions.Ackley;
-import benchmarks.BaseFunctions.Rosenbrock;
-import benchmarks.BaseFunctions.DeJongSphere;
 
 public class Test extends Experiment
 {
@@ -24,30 +17,30 @@ public class Test extends Experiment
 		Algorithm a;// ///< A generic optimiser.
 		Problem p;// ///< A generic problem.
 
+		// Add simulated annealing optimiser to test
 		a = new SimulatedAnnealing();
 		a.setParameter("initialTemperature", 10.0);
-		a.setParameter("coolingRate", 0.5);
+		a.setParameter("coolingRate", 0.8);
 		add(a); //add it to the list
 
-		// Add DeJong Sphere problem
+		// Add DeJong Sphere problem to test
 		p = new BaseFunctions.DeJongSphere(probDim);
 		p.setFID("DeJongSpehere");
 		add(p);
 
-		// Add Schwefel problem
+		// Add Schwefel problem to test
 		p = new BaseFunctions.Schwefel(probDim);
 		p.setFID("Schwefel");
 		add(p);
 
-		// Add Rastrigin problem
+		// Add Rastrigin problem to test
 		p = new BaseFunctions.Rastrigin(probDim);
 		p.setFID("Rastrigin");
 		add(p);
 
-		// Add Michalewicz problem
+		// Add Michalewicz problem to test
 		p = new BaseFunctions.Michalewicz(probDim);
 		p.setFID("Michalewicz");
 		add(p);
-
 	}
 }

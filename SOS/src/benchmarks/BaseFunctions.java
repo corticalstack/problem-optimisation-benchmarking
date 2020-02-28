@@ -293,7 +293,7 @@ public static class Rastrigin extends Problem
 		else
 		{
 			for (int i = 0; i < n; i++)
-				sum += (Math.sqrt(x[i]) - (10 * Math.cos(2 * Math.PI * x[i])));
+				sum += ((x[i] * x[i]) - (10 * Math.cos(2 * Math.PI * x[i])));
 			y = (10 * n) + sum;
 		}
 		return y;
@@ -311,7 +311,7 @@ public static class Michalewicz extends Problem
 	/**
 	 * Costructor for the Michalewicz function defined within the specified upper and lower bounds.
 	 */
-	public Michalewicz(int dimension){ super(dimension, new double[] {0, Math.PI});}
+	public Michalewicz(int dimension){ super(dimension, new double[] {0.0, Math.PI});}
 	/**
 	 * Costructor for the Michalewicz function defined within a hyper-cube.
 	 */

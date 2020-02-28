@@ -5,6 +5,7 @@ import interfaces.Algorithm;
 import interfaces.Problem;
 import utils.RunAndStore.FTrend;
 import utils.random.RandUtils;
+import utils.algorithms.Misc;
 
 import static utils.MatLab.max;
 import static utils.MatLab.min;
@@ -53,9 +54,10 @@ public class SimulatedAnnealing extends Algorithm //This class implements the al
 		FT.add(0, fcb); // Store the initial guess
 		
 		//main loop
-		while ((i < maxEvaluations) && (temperature > temperatureThreshold)) {
+		while ((i < maxEvaluations) && (temperature > temperatureThreshold)) {  // Prevent t < tmin
 			i++;
 			xnew = generateRandomSolution(bounds, problemDimension);
+			xnew = Misc.toro(xnew, bounds);
 			fnew = problem.f(xnew);
 
 			if (RandUtils.random() < (Math.exp(fcb - fnew) / temperature)) {
