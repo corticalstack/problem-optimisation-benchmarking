@@ -19,11 +19,10 @@ public class SimulatedAnnealing extends Algorithm //This class implements the al
 	@Override
 	public FTrend execute(Problem problem, int maxEvaluations) throws Exception
 	{
-
 		double temperature = getParameter("initialTemperature");
 		double coolingRate = getParameter("coolingRate");
 
-		int temperatureThreshold = 1;
+		double temperatureThreshold = 1;
 
 		int problemDimension = problem.getDimension();
 		double[][] bounds = problem.getBounds();
@@ -35,10 +34,12 @@ public class SimulatedAnnealing extends Algorithm //This class implements the al
 		double[] xnew = new double[problemDimension]; // new x
 		double fnew;                                   // new fitness of x
 
+		double loss;
+		double probability;
 
 		int i = 0;
 
-		// initial solution
+		// Begin with random configuation
 		if (initialSolution != null)
 		{
 			xcb = initialSolution;
@@ -52,24 +53,34 @@ public class SimulatedAnnealing extends Algorithm //This class implements the al
 		}
 
 		FT.add(0, fcb); // Store the initial guess
-		
-		//main loop
-		while ((i < maxEvaluations) && (temperature > temperatureThreshold)) {  // Prevent t < tmin
+
+		//Decrease until budget comnsumed or cool until minimum temperature reached
+		//while ((i < maxEvaluations) && (temperature > temperatureThreshold)) {  // Prevent t < tmin
+		while ((i < maxEvaluations)) {
 			i++;
 			xnew = generateRandomSolution(bounds, problemDimension);
-			xnew = Misc.toro(xnew, bounds);
+			xnew = Misc.toro(xnew, bounds);  // Always saturate within search space
 			fnew = problem.f(xnew);
 
-			if (RandUtils.random() < (Math.exp(fcb - fnew) / temperature)) {
+			loss = fcb - fnew;
+			probability = Math.exp(loss / temperature);
+			if (fnew < fcb) {  // Pairwise comparison - if change in energy is decreasing then accept the new solution
 				FT.add(i, fnew);
-				xcb = xnew;
 				fcb = fnew;
+				xcb = xnew;
 			}
-			temperature = temperature * coolingRate;
+
+			if ((fnew < fcb) || (RandUtils.random() < probability)) {
+				fcb = fnew;
+
+			}
+			temperature = temperature * coolingRate;  // Note this is a linear schedule
+			// System.out.println("Temp is : " + temperature);
 		}
 
 		finalBest = xcb;
 		return FT; // Return the fitness trend
+
 	}
 }
 
