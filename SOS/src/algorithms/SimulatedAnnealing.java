@@ -3,9 +3,11 @@ package algorithms;
 
 import interfaces.Algorithm;
 import interfaces.Problem;
+import org.apache.commons.math3.stat.StatUtils;
 import utils.RunAndStore.FTrend;
 import utils.random.RandUtils;
 import utils.algorithms.Misc;
+import java.util.Arrays;
 
 import static utils.MatLab.max;
 import static utils.MatLab.min;
@@ -19,27 +21,29 @@ public class SimulatedAnnealing extends Algorithm //This class implements the al
 	@Override
 	public FTrend execute(Problem problem, int maxEvaluations) throws Exception
 	{
-		double temperature = getParameter("initialTemperature");
+		double temperature = setInitialTemp(problem, maxEvaluations);  // Set maximum temp from random solution subset
 		double coolingRate = getParameter("coolingRate");
-
 		double temperatureThreshold = 1;
 
 		int problemDimension = problem.getDimension();
 		double[][] bounds = problem.getBounds();
 
 		FTrend FT = new FTrend();
-		double[] xcb = new double[problemDimension];  // current x
-		double fcb;                                   // current fitness of x
 
-		double[] xnew = new double[problemDimension]; // new x
-		double fnew;                                   // new fitness of x
+		// Current solution and fitness
+		double[] xcb;
+		double fcb;
+
+		// New solution and fitness
+		double[] xnew;
+		double fnew;
 
 		double loss;
 		double probability;
 
 		int i = 0;
 
-		// Begin with random configuation
+		// Begin with random solution configuration
 		if (initialSolution != null)
 		{
 			xcb = initialSolution;
@@ -55,35 +59,50 @@ public class SimulatedAnnealing extends Algorithm //This class implements the al
 		FT.add(0, fcb); // Store the initial guess
 
 		//Decrease until budget comnsumed or cool until minimum temperature reached
-		//while ((i < maxEvaluations) && (temperature > temperatureThreshold)) {  // Prevent t < tmin
-		while ((i < maxEvaluations)) {
+		while ((i < maxEvaluations) && (temperature > temperatureThreshold)) {  // Prevent t < tmin
 			i++;
 			xnew = generateRandomSolution(bounds, problemDimension);
-			xnew = Misc.toro(xnew, bounds);  // Always saturate within search space
+			xnew = Misc.toro(xnew, bounds);  // Always saturate solution within search space
 			fnew = problem.f(xnew);
 
 			loss = fcb - fnew;
 			probability = Math.exp(loss / temperature);
-			if (fnew < fcb) {  // Pairwise comparison - if change in energy is decreasing then accept the new solution
+			//if (fnew < fcb) {  // Pairwise comparison - if change in energy is decreasing then accept the new solution
+			//	FT.add(i, fnew);
+			//	fcb = fnew;
+			//	xcb = xnew;
+			//}
+
+			if ((fnew < fcb) || (RandUtils.random() < probability)) {  // Or move to random new pointy
 				FT.add(i, fnew);
 				fcb = fnew;
 				xcb = xnew;
 			}
+			temperature = temperature * coolingRate;
 
-			if ((fnew < fcb) || (RandUtils.random() < probability)) {
-				fcb = fnew;
-
-			}
-			temperature = temperature * coolingRate;  // Note this is a linear schedule
-			// System.out.println("Temp is : " + temperature);
 		}
-
 		finalBest = xcb;
 		return FT; // Return the fitness trend
+	}
 
+	private double setInitialTemp (Problem problem, int maxEvaluations)  throws Exception {
+		int problemDimension = problem.getDimension();
+		double[][] bounds = problem.getBounds();
+		int i = 0;
+		int maxIter = (int)(maxEvaluations * 0.001);
+
+		double[] fcurrSubset = new double[maxIter + 1];
+		double[] xcurr;
+		double fcurr;
+
+		while (i < maxIter) {
+			i++;
+			xcurr = generateRandomSolution(bounds, problemDimension);
+			fcurr = problem.f(xcurr);
+			fcurrSubset[i] = fcurr;
+		}
+
+		return StatUtils.percentile(fcurrSubset, 95);
 	}
 }
-
-
-
 
