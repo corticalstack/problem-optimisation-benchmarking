@@ -61,10 +61,10 @@ public class Misc
 	 */
 	public static double[] generateRandomSolution(double[][] bounds, int n)
 	{
-			double[] r = new double[n];
-		    for (int i = 0; i<n; i++)
-		      r[i]= (int)(Math.random() * (bounds[i][1]-bounds[i][0])) + bounds[i][0];
-			return r;
+		double[] r = new double[n];
+		for (int i = 0; i<n; i++)
+			r[i]= (int)(Math.random() * (bounds[i][1]-bounds[i][0])) + bounds[i][0];
+		return r;
 	}
 
 	/**

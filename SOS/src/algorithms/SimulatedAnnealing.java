@@ -14,9 +14,9 @@ import static utils.MatLab.min;
 import static utils.algorithms.Misc.generateRandomSolution;
 
 /**
- * S (Hooke Jeeves) single solution deterministic algorithm
+ * Simulated Annealing optimiser
  */
-public class SimulatedAnnealing extends Algorithm //This class implements the algorithm. Every algorithm will have to contain its specific implementation within the method "execute". The latter will contain a main loop performing the iterations, and will have to return the fitness trend (including the final best) solution. Look at this examples before implementing your first algorithm.
+public class SimulatedAnnealing extends Algorithm
 {
 	@Override
 	public FTrend execute(Problem problem, int maxEvaluations) throws Exception
@@ -42,7 +42,6 @@ public class SimulatedAnnealing extends Algorithm //This class implements the al
 		double probability;
 
 		int i = 0;
-
 		// Begin with random solution configuration
 		if (initialSolution != null)
 		{
@@ -67,17 +66,16 @@ public class SimulatedAnnealing extends Algorithm //This class implements the al
 
 			loss = fcb - fnew;
 			probability = Math.exp(loss / temperature);
-			//if (fnew < fcb) {  // Pairwise comparison - if change in energy is decreasing then accept the new solution
-			//	FT.add(i, fnew);
-			//	fcb = fnew;
-			//	xcb = xnew;
-			//}
 
-			if ((fnew < fcb) || (RandUtils.random() < probability)) {  // Or move to random new pointy
+			// Pairwise comparison - if change in energy is decreasing then accept the new solution
+			//                     - or move to random new point nearby
+			if ((fnew < fcb) || (RandUtils.random() < probability)) {
 				FT.add(i, fnew);
 				fcb = fnew;
 				xcb = xnew;
 			}
+
+			// Exponential cooling schedule implemented as current temperature multiplied by fixed factor
 			temperature = temperature * coolingRate;
 
 		}
@@ -89,12 +87,15 @@ public class SimulatedAnnealing extends Algorithm //This class implements the al
 		int problemDimension = problem.getDimension();
 		double[][] bounds = problem.getBounds();
 		int i = 0;
-		int maxIter = (int)(maxEvaluations * 0.001);
+
+		// Sample 10% of search space to determine starting max temperature
+		int maxIter = (int)(maxEvaluations * 0.1);
 
 		double[] fcurrSubset = new double[maxIter + 1];
 		double[] xcurr;
 		double fcurr;
 
+		// Build up sample subset of temps
 		while (i < maxIter) {
 			i++;
 			xcurr = generateRandomSolution(bounds, problemDimension);
@@ -102,6 +103,7 @@ public class SimulatedAnnealing extends Algorithm //This class implements the al
 			fcurrSubset[i] = fcurr;
 		}
 
+		// Use 95th percentile as starting max temperature
 		return StatUtils.percentile(fcurrSubset, 95);
 	}
 }

@@ -19,22 +19,16 @@ public class RunExperiments
 	* This method has to be modified in order to launch a new experiment.
 	*/
 	public static void main(String[] args) throws Exception
-	{	
-		
-		// make sure that "results" folder exists
+	{
 		resultsFolder();
-	
-	
+
 		Vector<Experiment> experiments = new Vector<Experiment>();////!< List of problems 
-	
-			
+
 		//@@@ MODIFY THIS PART @@@
 		experiments.add(new Test( 10));
-		//experiments.add(new Test( 30));
-		//experiments.add(new Test( 50));
+		experiments.add(new Test( 30));
+		experiments.add(new Test( 50));
 		//@@@@@@
-	
-	
 	
 		for(Experiment experiment : experiments)
 		{
